@@ -1,6 +1,6 @@
 from django.urls import path
 
-from orders.shop import views
+from shop import views
 # import orders.shop
 
 # from django.views import reset_password_request_token, reset_password_confirm

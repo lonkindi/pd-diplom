@@ -1,8 +1,8 @@
 # Create your views here.
 from rest_framework.generics import ListAPIView
 
-from orders.shop.models import Category
-from orders.shop.serializers import CategorySerializer
+from shop.models import Category
+from shop.serializers import CategorySerializer
 
 
 class CategoryView(ListAPIView):

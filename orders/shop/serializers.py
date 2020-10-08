@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from orders.shop.models import Category
+from shop.models import Category
 
 
 class CategorySerializer(serializers.ModelSerializer):

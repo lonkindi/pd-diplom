@@ -37,7 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'shop.apps.BackendConfig',
+    'shop',
     'rest_framework',
 ]
 
@@ -101,6 +101,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+AUTH_USER_MODEL = 'shop.MyUser'
 
 # Internationalization
 # https://docs.djangoproject.com/en/2.0/topics/i18n/
