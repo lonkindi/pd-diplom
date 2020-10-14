@@ -13,7 +13,7 @@ from requests import get
 from yaml import load as load_yaml, Loader
 
 from shop.models import Category, Product, ProductInfo, Parameter, ProductParameter, Shop
-from shop.serializers import CategorySerializer
+from shop.serializers import CategorySerializer, ShopSerializer
 
 
 class LoginAccount(APIView):
@@ -95,3 +95,11 @@ class CategoryView(ListAPIView):
     """
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
+
+
+class ShopView(ListAPIView):
+    """
+    Класс для просмотра списка магазинов
+    """
+    queryset = Shop.objects.filter(state=True)
+    serializer_class = ShopSerializer
