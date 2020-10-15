@@ -104,8 +104,7 @@ class Shop(models.Model):
                                 blank=True, null=True,
                                 on_delete=models.CASCADE)
     state = models.BooleanField(verbose_name='Магазин работает?', default=True)
-
-    # filename???? для чего???
+    filename = models.FileField(upload_to=f'data/price/', verbose_name='Актуальный прайс-лист')
 
     class Meta:
         verbose_name = 'Магазин'
@@ -122,7 +121,7 @@ class Category(models.Model):
 
     class Meta:
         verbose_name = 'Категория'
-        verbose_name_plural = "Список категорий"
+        verbose_name_plural = "Категории"
         ordering = ('-name',)
 
     def __str__(self):
