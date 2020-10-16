@@ -1,4 +1,6 @@
 # Create your views here.
+import os
+
 from django.contrib.auth import authenticate
 from django.core.validators import URLValidator
 from django.http import JsonResponse
@@ -30,6 +32,7 @@ class LoginAccount(APIView):
             if user is not None:
                 if user.is_active:
                     token, _ = Token.objects.get_or_create(user=user)
+                    # print('user=', user.email)
 
                     return JsonResponse({'Status': True, 'Token': token.key})
 
@@ -66,19 +69,23 @@ class PartnerUpdate(APIView):
         if request.user.type != 'shop':
             return JsonResponse({'Status': False, 'Error': 'Только для магазинов'}, status=403)
 
-        url = request.data.get('url')
-        if url:
-            validate_url = URLValidator()
-            try:
-                validate_url(url)
-            except ValidationError as e:
-                return JsonResponse({'Status': False, 'Error': str(e)})
-            else:
-                stream = get(url).content
+        shop = Shop.objects.filter(user=request.user)[0]
+        price = str(shop.filename)
 
-                data = load_yaml(stream, Loader=Loader)
+        print('price=', price)
 
-                shop, _ = Shop.objects.get_or_create(name=data['shop'], user_id=request.user.id)
+        if price:
+            # validate_url = URLValidator()
+            if os.path.exists(price):
+            #     validate_url(url)
+            # except ValidationError as e:
+            #     return JsonResponse({'Status': False, 'Error': str(e)})
+            # else:
+                # stream = get(url).content
+
+                data = load_yaml(price, Loader=Loader)
+
+                # shop, _ = Shop.objects.get_or_create(name=data['shop'], user_id=request.user.id)
                 for category in data['categories']:
                     category_object, _ = Category.objects.get_or_create(id=category['id'], name=category['name'])
                     category_object.shops.add(shop.id)
