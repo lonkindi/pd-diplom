@@ -143,8 +143,8 @@ class Product(models.Model):
 
 
 class ProductInfo(models.Model):
-    # model = models.CharField(max_length=80, verbose_name='Модель', blank=True)
-    # external_id = models.PositiveIntegerField(verbose_name='Внешний ИД')
+    model = models.CharField(max_length=80, verbose_name='Модель', blank=True)
+    external_id = models.PositiveIntegerField(verbose_name='Внешний ИД')
     product = models.ForeignKey(Product, verbose_name='Продукт', related_name='product_infos', blank=True,
                                 on_delete=models.CASCADE)
     shop = models.ForeignKey(Shop, verbose_name='Магазин', related_name='product_infos', blank=True,
@@ -194,20 +194,20 @@ class Contact(models.Model):
                              related_name='contacts', blank=True,
                              on_delete=models.CASCADE)
 
-    city = models.CharField(max_length=50, verbose_name='Город')
-    street = models.CharField(max_length=100, verbose_name='Улица')
-    house = models.CharField(max_length=15, verbose_name='Дом', blank=True)
-    structure = models.CharField(max_length=15, verbose_name='Корпус', blank=True)
-    building = models.CharField(max_length=15, verbose_name='Строение', blank=True)
-    apartment = models.CharField(max_length=15, verbose_name='Квартира', blank=True)
-    phone = models.CharField(max_length=20, verbose_name='Телефон')
+    type = models.CharField(max_length=50, verbose_name='Тип')
+    value = models.CharField(max_length=100, verbose_name='Значение')
+    # house = models.CharField(max_length=15, verbose_name='Дом', blank=True)
+    # structure = models.CharField(max_length=15, verbose_name='Корпус', blank=True)
+    # building = models.CharField(max_length=15, verbose_name='Строение', blank=True)
+    # apartment = models.CharField(max_length=15, verbose_name='Квартира', blank=True)
+    # phone = models.CharField(max_length=20, verbose_name='Телефон')
 
     class Meta:
         verbose_name = 'Контакты пользователя'
         verbose_name_plural = "Список контактов пользователя"
 
     def __str__(self):
-        return f'{self.city} {self.street} {self.house}'
+        return f'{self.type} {self.value}'
 
 
 class Order(models.Model):
