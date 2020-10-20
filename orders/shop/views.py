@@ -154,7 +154,7 @@ class RegisterAccount(APIView):
         return JsonResponse({'Status': False, 'Errors': 'Не указаны все необходимые аргументы'})
 
 
-class ProductInfoView(APIView):
+class ProductListView(APIView):
     """
     Класс для поиска товаров
     """
@@ -174,6 +174,31 @@ class ProductInfoView(APIView):
         queryset = ProductInfo.objects.filter(
             query).select_related(
             'shop', 'product__category').prefetch_related(
+            'product_parameters__parameter').distinct()
+
+        serializer = ProductInfoSerializer(queryset, many=True)
+
+        return Response(serializer.data)
+
+class ProductView(APIView):
+    """
+    Класс для выдачи информации о товаре
+    """
+    def get(self, request, *args, **kwargs):
+
+        # query = Q(shop__state=True)
+        product_id = request.query_params.get('id')
+        # category_id = request.query_params.get('category_id')
+
+        # if shop_id:
+        #     query = query & Q(shop_id=shop_id)
+        #
+        # if category_id:
+        #     query = query & Q(product__category_id=category_id)
+
+        # фильтруем и отбрасываем дуликаты
+        queryset = ProductInfo.objects.filter(product__id=
+            product_id).prefetch_related(
             'product_parameters__parameter').distinct()
 
         serializer = ProductInfoSerializer(queryset, many=True)

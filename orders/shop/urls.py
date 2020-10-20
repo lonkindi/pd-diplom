@@ -1,6 +1,7 @@
 from django.urls import path
 
-from shop.views import CategoryView, ShopView, PartnerUpdate, LoginAccount, RegisterAccount, ProductInfoView
+from shop.views import CategoryView, ShopView, PartnerUpdate, LoginAccount, RegisterAccount, ProductListView, \
+    ProductView
 
 # import orders.shop
 
@@ -22,7 +23,8 @@ urlpatterns = [
     # path('user/password_reset/confirm', reset_password_confirm, name='password-reset-confirm'),
     path('categories', CategoryView.as_view(), name='categories'),
     path('shops', ShopView.as_view(), name='shops'),
-    path('products', ProductInfoView.as_view(), name='shops'),
+    path('products', ProductListView.as_view(), name='products'),
+    path('product', ProductView.as_view(), name='product'),
     # path('basket', BasketView.as_view(), name='basket'),
     # path('order', OrderView.as_view(), name='order'),
 ]
