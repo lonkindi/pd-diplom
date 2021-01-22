@@ -49,7 +49,7 @@ class LoginAccount(APIView):
 
 class CategoryView(ListAPIView):
     """
-    Класс для просмотра категорий
+    +Класс для просмотра категорий
     """
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
@@ -57,7 +57,7 @@ class CategoryView(ListAPIView):
 
 class ShopView(ListAPIView):
     """
-    Класс для просмотра списка магазинов
+    +Класс для просмотра списка магазинов
     """
     queryset = Shop.objects.filter(state=True)
     serializer_class = ShopSerializer
@@ -65,7 +65,7 @@ class ShopView(ListAPIView):
 
 class PartnerUpdate(APIView):
     """
-    Класс для обновления прайса от поставщика
+    +Класс для обновления прайса от поставщика
     """
 
     def post(self, request, *args, **kwargs):
@@ -216,7 +216,7 @@ class BasketView(APIView):
     # получить корзину
     def get(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
-            return JsonResponse({'Status': False, 'Error': 'Log in required'}, status=403)
+            return JsonResponse({'Status': False, 'Error': 'Требуется авторизация!'}, status=403)
         basket = Order.objects.filter(
             user_id=request.user.id, state='basket').prefetch_related(
             'ordered_items__product_info__product__category',
@@ -282,22 +282,26 @@ class BasketView(APIView):
     # добавить позиции в корзину
     def put(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
-            return JsonResponse({'Status': False, 'Error': 'Log in required'}, status=403)
+            return JsonResponse({'Status': False, 'Error': 'Требуется авторизация!'}, status=403)
 
         items_sting = request.data.get('items')
-        print('items_sting =', items_sting)
+        #print('items_sting =', items_sting)
         if items_sting:
             try:
                 items_dict = load_json(items_sting)
-                print('items_dict =', items_dict)
+                #print('items_dict =', items_dict)
             except ValueError:
                 JsonResponse({'Status': False, 'Errors': 'Неверный формат запроса'})
             else:
                 basket, _ = Order.objects.get_or_create(user_id=request.user.id, state='basket')
+                # print('basket=', basket.id)
                 objects_updated = 0
                 for order_item in items_dict:
                     if type(order_item['id']) == int and type(order_item['quantity']) == int:
-                        objects_updated += OrderItem.objects.filter(order_id=basket.id, id=order_item['id']).update(
+                        # print('order_item[id]=', order_item['id'])
+                        # print('order_item[quantity]=', order_item['quantity'])
+                        print('OrderItem=', OrderItem.objects.filter(order_id=basket.id)) #, product_info_id=order_item['id']))
+                        objects_updated += OrderItem.objects.filter(order_id=basket.id, product_info__product__id=order_item['id']).update(
                             quantity=order_item['quantity'])
 
                 return JsonResponse({'Status': True, 'Обновлено объектов': objects_updated})
