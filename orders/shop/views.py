@@ -227,7 +227,7 @@ class BasketView(APIView):
         return Response(serializer.data)
 
     # редактировать корзину
-    def post(self, request, *args, **kwargs):
+    def put(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
             return JsonResponse({'Status': False, 'Error': 'Log in required'}, status=403)
 
@@ -280,7 +280,7 @@ class BasketView(APIView):
         return JsonResponse({'Status': False, 'Errors': 'Не указаны все необходимые аргументы'})
 
     # добавить позиции в корзину
-    def put(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
             return JsonResponse({'Status': False, 'Error': 'Требуется авторизация!'}, status=403)
 
@@ -295,15 +295,26 @@ class BasketView(APIView):
             else:
                 basket, _ = Order.objects.get_or_create(user_id=request.user.id, state='basket')
                 # print('basket=', basket.id)
-                objects_updated = 0
+                objects_inserted = 0
                 for order_item in items_dict:
-                    if type(order_item['id']) == int and type(order_item['quantity']) == int:
-                        # print('order_item[id]=', order_item['id'])
-                        # print('order_item[quantity]=', order_item['quantity'])
-                        print('OrderItem=', OrderItem.objects.filter(order_id=basket.id)) #, product_info_id=order_item['id']))
-                        objects_updated += OrderItem.objects.filter(order_id=basket.id, product_info__product__id=order_item['id']).update(
-                            quantity=order_item['quantity'])
+                    if type(order_item['product_info_id']) == int and type(order_item['quantity']) == int:
+                        product_info = ProductInfo.objects.filter(id=order_item['product_info_id'])
+                        if product_info:
+                            current_item = OrderItem.objects.filter(order_id=basket.id, product_info_id=product_info[0].id)
+                            if not current_item:
+                                OrderItem.objects.create(order_id=basket.id,
+                                                         product_info_id=order_item['product_info_id'],
+                                                         quantity=order_item['quantity'])
+                                objects_inserted += 1
 
-                return JsonResponse({'Status': True, 'Обновлено объектов': objects_updated})
+                            # print('product_info=', product_info)
+                            # print('order_item[quantity]=', order_item['quantity'])
+                            # current_item = OrderItem.objects.get_or_create(order_id=basket.id, product_info_id=order_item['product_info_id'], quantity=0) #order_item['quantity'])
+                            # print('OrderItem=', OrderItem.objects.filter(order_id=basket.id)) #, product_info_id=order_item['id']))
+                            # objects_inserted += 1 OrderItem.objects.filter(order_id=basket.id, product_info__product__id=order_item['id']).update(
+                                # quantity=order_item['quantity'])
+                    #     return JsonResponse({'Status': False, 'Errors': 'Указанный товар не найден'})
+                    # return JsonResponse({'Status': False, 'Errors': 'Не корректный тип аргумента'})
+                return JsonResponse({'Status': True, 'Добавлено объектов': objects_inserted})
         return JsonResponse({'Status': False, 'Errors': 'Не указаны все необходимые аргументы'})
 
