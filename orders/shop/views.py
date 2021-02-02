@@ -229,52 +229,61 @@ class BasketView(APIView):
     # редактировать корзину
     def put(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
-            return JsonResponse({'Status': False, 'Error': 'Log in required'}, status=403)
+            return JsonResponse({'Status': False, 'Error': 'Необходима авторизация'}, status=403)
 
         items_sting = request.data.get('items')
+        print('items_sting= ', items_sting)
         if items_sting:
             try:
                 items_dict = load_json(items_sting)
+                print('items_dict=', items_dict)
             except ValueError:
                 JsonResponse({'Status': False, 'Errors': 'Неверный формат запроса'})
             else:
                 basket, _ = Order.objects.get_or_create(user_id=request.user.id, state='basket')
                 objects_created = 0
                 for order_item in items_dict:
-                    order_item.update({'order': basket.id})
+                    order_item.update({'order_id': basket.id})
+                    print('order_item=', order_item)
                     serializer = OrderItemSerializer(data=order_item)
+                    print('serializer=', serializer)
                     if serializer.is_valid():
                         try:
                             serializer.save()
                         except IntegrityError as error:
-                            return JsonResponse({'Status': False, 'Errors': str(error)})
+                            return JsonResponse({'Status': False, 'Errors serializer.save()': str(error)})
                         else:
                             objects_created += 1
 
                     else:
 
-                        JsonResponse({'Status': False, 'Errors': serializer.errors})
+                        JsonResponse({'Status': False, 'Errors serializer': serializer.errors})
 
-                return JsonResponse({'Status': True, 'Создано объектов': objects_created})
+                return JsonResponse({'Status': True, 'Отредактированно объектов': objects_created})
         return JsonResponse({'Status': False, 'Errors': 'Не указаны все необходимые аргументы'})
 
     # удалить товары из корзины
     def delete(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
-            return JsonResponse({'Status': False, 'Error': 'Log in required'}, status=403)
+            return JsonResponse({'Status': False, 'Error': 'Необходима авторизация'}, status=403)
 
         items_sting = request.data.get('items')
         if items_sting:
+            # print('items_sting=', items_sting)
             items_list = items_sting.split(',')
+            # print('items_list', items_list)
             basket, _ = Order.objects.get_or_create(user_id=request.user.id, state='basket')
             query = Q()
             objects_deleted = False
             for order_item_id in items_list:
+                #print('order_item_type=', type(order_item_id))
                 if order_item_id.isdigit():
-                    query = query | Q(order_id=basket.id, id=order_item_id)
+                    item_id = int(order_item_id)
+                    query = query | Q(order_id=basket.id, product_info_id=item_id)
                     objects_deleted = True
 
             if objects_deleted:
+                # print('OrderItem.objects.filter(query)=', query)
                 deleted_count = OrderItem.objects.filter(query).delete()[0]
                 return JsonResponse({'Status': True, 'Удалено объектов': deleted_count})
         return JsonResponse({'Status': False, 'Errors': 'Не указаны все необходимые аргументы'})
@@ -297,11 +306,12 @@ class BasketView(APIView):
                 # print('basket=', basket.id)
                 objects_inserted = 0
                 for order_item in items_dict:
-                    if type(order_item['product_info_id']) == int and type(order_item['quantity']) == int:
+                    if type(order_item['product_info_id']) == int and type(order_item['quantity']) == int \
+                            and order_item['quantity'] > 0:
                         product_info = ProductInfo.objects.filter(id=order_item['product_info_id'])
                         if product_info:
                             current_item = OrderItem.objects.filter(order_id=basket.id, product_info_id=product_info[0].id)
-                            if not current_item:
+                            if not current_item :
                                 OrderItem.objects.create(order_id=basket.id,
                                                          product_info_id=order_item['product_info_id'],
                                                          quantity=order_item['quantity'])

@@ -246,7 +246,7 @@ class OrderItem(models.Model):
         verbose_name = 'Заказанная позиция'
         verbose_name_plural = "Список заказанных позиций"
         constraints = [
-            models.UniqueConstraint(fields=['order_id', 'product_info'], name='unique_order_item'),
+            models.UniqueConstraint(fields=['order_id', 'product_info_id'], name='unique_order_item'),
         ]
 
 class ConfirmEmailToken(models.Model):
