@@ -243,7 +243,7 @@ class BasketView(APIView):
                 basket, _ = Order.objects.get_or_create(user_id=request.user.id, state='basket')
                 objects_created = 0
                 for order_item in items_dict:
-                    order_item.update({'order_id': basket.id})
+                    order_item.update({'order': basket.id})
                     print('order_item=', order_item)
                     serializer = OrderItemSerializer(data=order_item)
                     print('serializer=', serializer)
