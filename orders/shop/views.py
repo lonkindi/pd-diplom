@@ -22,6 +22,7 @@ from json import loads as load_json
 from shop.models import Category, Product, ProductInfo, Parameter, ProductParameter, Shop, Order, OrderItem
 from shop.serializers import CategorySerializer, ShopSerializer, MyUserSerializer, ProductInfoSerializer, \
     OrderSerializer, OrderItemSerializer
+from shop.signals import new_order
 
 
 class LoginAccount(APIView):
@@ -128,11 +129,12 @@ class PartnerOrders(APIView):
 
         if request.user.type != 'shop':
             return JsonResponse({'Status': False, 'Error': 'Только для магазинов'}, status=403)
-        print('===',
-              OrderItem.objects.filter(product_info__shop_id=request.user.id)
-              )
+        # print('===',
+        #       OrderItem.objects.filter(product_info__shop_id=request.user.id)
+        #       )
         order = Order.objects.filter(
-            ordered_items__product_info__shop_id=request.user.id).exclude(state='basket').prefetch_related(
+            ordered_items__product_info__shop__user_id=request.user.id).exclude(state='basket').prefetch_related(
+            'ordered_items__product_info__product__category',
             'ordered_items__product_info__product_parameters__parameter').select_related('contact').annotate(
             total_sum=Sum(F('ordered_items__quantity') * F('ordered_items__product_info__price'))).distinct()
 
@@ -388,6 +390,6 @@ class OrderView(APIView):
                     return JsonResponse({'Status': False, 'Errors': 'Неправильно указаны аргументы'})
                 else:
                     if is_updated:
-                        # new_order.send(sender=self.__class__, user_id=request.user.id)
+                        new_order.send(sender=self.__class__, user_id=request.user.id)
                         return JsonResponse({'Status': True, 'Оформлен заказ №': request.data['id']})
         return JsonResponse({'Status': False, 'Errors': 'Корзина не найдена'})
