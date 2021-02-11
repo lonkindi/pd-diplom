@@ -6,7 +6,7 @@ from shop.models import Category, Shop, MyUser, Product, ProductParameter, Produ
 class ContactSerializer(serializers.ModelSerializer):
     class Meta:
         model = Contact
-        fields = ('id', 'type', 'value') #, 'house', 'structure', 'building', 'apartment', 'user', 'phone')
+        fields = ('id', 'type', 'value')  # , 'house', 'structure', 'building', 'apartment', 'user', 'phone')
         read_only_fields = ('id',)
         extra_kwargs = {
             'user': {'write_only': True}
@@ -19,17 +19,20 @@ class CategorySerializer(serializers.ModelSerializer):
         fields = ('id', 'name',)
         read_only_fields = ('id',)
 
+
 class ShopSerializer(serializers.ModelSerializer):
     class Meta:
         model = Shop
         fields = ('name', 'url', 'state',)
         read_only_fields = ('id',)
 
+
 class MyUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = MyUser
         fields = ('id', 'first_name', 'last_name', 'email', 'is_active', 'type', 'contacts')
         read_only_fields = ('id',)
+
 
 class ProductSerializer(serializers.ModelSerializer):
     category = serializers.StringRelatedField()
@@ -46,6 +49,7 @@ class ProductParameterSerializer(serializers.ModelSerializer):
         model = ProductParameter
         fields = ('parameter', 'value',)
 
+
 class ProductInfoSerializer(serializers.ModelSerializer):
     product = ProductSerializer(read_only=True)
     product_parameters = ProductParameterSerializer(read_only=True, many=True)
@@ -54,6 +58,7 @@ class ProductInfoSerializer(serializers.ModelSerializer):
         model = ProductInfo
         fields = ('id', 'model', 'product', 'shop', 'quantity', 'price', 'price_rrc', 'product_parameters',)
         read_only_fields = ('id',)
+
 
 class OrderItemSerializer(serializers.ModelSerializer):
     class Meta:
@@ -64,8 +69,10 @@ class OrderItemSerializer(serializers.ModelSerializer):
             'order': {'write_only': True}
         }
 
+
 class OrderItemCreateSerializer(OrderItemSerializer):
     product_info = ProductInfoSerializer(read_only=True)
+
 
 class OrderSerializer(serializers.ModelSerializer):
     ordered_items = OrderItemCreateSerializer(read_only=True, many=True)

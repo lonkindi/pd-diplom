@@ -156,9 +156,6 @@ class ProductInfo(models.Model):
     class Meta:
         verbose_name = 'Информация о продукте'
         verbose_name_plural = "Информационный список о продуктах"
-        # constraints = [
-        #     models.UniqueConstraint(fields=['product', 'shop', 'external_id'], name='unique_product_info'),
-        # ]
 
 
 class Parameter(models.Model):
@@ -196,11 +193,6 @@ class Contact(models.Model):
 
     type = models.CharField(max_length=50, verbose_name='Тип')
     value = models.CharField(max_length=100, verbose_name='Значение')
-    # house = models.CharField(max_length=15, verbose_name='Дом', blank=True)
-    # structure = models.CharField(max_length=15, verbose_name='Корпус', blank=True)
-    # building = models.CharField(max_length=15, verbose_name='Строение', blank=True)
-    # apartment = models.CharField(max_length=15, verbose_name='Квартира', blank=True)
-    # phone = models.CharField(max_length=20, verbose_name='Телефон')
 
     class Meta:
         verbose_name = 'Контакты пользователя'
@@ -228,10 +220,6 @@ class Order(models.Model):
     def __str__(self):
         return str(self.dt)
 
-    # @property
-    # def sum(self):
-    #     return self.ordered_items.aggregate(total=Sum("quantity"))["total"]
-
 
 class OrderItem(models.Model):
     order = models.ForeignKey(Order, verbose_name='Заказ', related_name='ordered_items',
@@ -249,6 +237,7 @@ class OrderItem(models.Model):
         constraints = [
             models.UniqueConstraint(fields=['order', 'product_info'], name='unique_order_item'),
         ]
+
 
 class ConfirmEmailToken(models.Model):
     class Meta:
