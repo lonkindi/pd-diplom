@@ -23,6 +23,7 @@ from shop.models import Category, Product, ProductInfo, Parameter, ProductParame
 from shop.serializers import CategorySerializer, ShopSerializer, MyUserSerializer, ProductInfoSerializer, \
     OrderSerializer, OrderItemSerializer
 from shop.signals import new_order
+from shop.tasks import new_order_email_task
 
 
 class LoginAccount(APIView):
@@ -348,6 +349,7 @@ class OrderView(APIView):
                     return JsonResponse({'Status': False, 'Errors': 'Неправильно указаны аргументы'})
                 else:
                     if is_updated:
-                        new_order.send(sender=self.__class__, user_id=request.user.id)
+                        new_order_email_task.delay(user_id=request.user.id)
+                        # new_order.send(sender=self.__class__, user_id=request.user.id)
                         return JsonResponse({'Status': True, 'Оформлен заказ №': request.data['id']})
         return JsonResponse({'Status': False, 'Errors': 'Корзина не найдена'})
