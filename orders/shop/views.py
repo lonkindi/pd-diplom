@@ -1,28 +1,24 @@
 # Create your views here.
 import os
+from json import loads as load_json
 
 from django.contrib.auth import authenticate
 from django.contrib.auth.password_validation import validate_password
-from django.core.validators import URLValidator
-from django.db.models import Q, F, Sum
 from django.db import IntegrityError
+from django.db.models import Q, F, Sum
 from django.http import JsonResponse
-from django.core.exceptions import ValidationError
-
+from drf_spectacular.utils import extend_schema, extend_schema_serializer
+from rest_framework import viewsets
+from rest_framework.authtoken.models import Token
 from rest_framework.generics import ListAPIView
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.authtoken.models import Token
-
-from requests import get
-
 from yaml import load as load_yaml, Loader
-from json import loads as load_json
 
 from shop.models import Category, Product, ProductInfo, Parameter, ProductParameter, Shop, Order, OrderItem
 from shop.serializers import CategorySerializer, ShopSerializer, MyUserSerializer, ProductInfoSerializer, \
-    OrderSerializer, OrderItemSerializer
-from shop.signals import new_order
+    OrderSerializer
+# from shop.signals import new_order
 from shop.tasks import new_order_email_task
 
 
@@ -31,9 +27,10 @@ class LoginAccount(APIView):
     Класс для авторизации пользователей
     """
 
-    # Авторизация методом POST
     def post(self, request, *args, **kwargs):
-
+        """
+        Авторизация методом POST
+        """
         if {'email', 'password'}.issubset(request.data):
             user = authenticate(request, username=request.data['email'], password=request.data['password'])
 
@@ -50,15 +47,16 @@ class LoginAccount(APIView):
 
 class CategoryView(ListAPIView):
     """
-    +Класс для просмотра категорий
+    Класс для просмотра категорий
     """
+
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
 
 
 class ShopView(ListAPIView):
     """
-    +Класс для просмотра списка магазинов
+    Класс для просмотра списка магазинов
     """
     queryset = Shop.objects.filter(state=True)
     serializer_class = ShopSerializer
@@ -66,7 +64,7 @@ class ShopView(ListAPIView):
 
 class PartnerUpdate(APIView):
     """
-    +Класс для обновления прайса от поставщика
+    Класс для обновления прайса поставщика
     """
 
     def post(self, request, *args, **kwargs):
@@ -111,24 +109,26 @@ class PartnerUpdate(APIView):
         return JsonResponse({'Status': False, 'Errors': 'Файл импорта не найден'})
 
 
-class PartnerOrders(APIView):
+class PartnerOrders(viewsets.ModelViewSet):
     """
     Класс для получения заказов поставщиками
     """
+    serializer_class = OrderSerializer
+    queryset = Order.objects.all()
 
-    def get(self, request, *args, **kwargs):
+    def get_orders(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
             return JsonResponse({'Status': False, 'Error': 'Необходима авторизация'}, status=403)
 
         if request.user.type != 'shop':
             return JsonResponse({'Status': False, 'Error': 'Только для магазинов'}, status=403)
-        order = Order.objects.filter(
+        orders = self.queryset.filter(
             ordered_items__product_info__shop__user_id=request.user.id).exclude(state='basket').prefetch_related(
             'ordered_items__product_info__product__category',
             'ordered_items__product_info__product_parameters__parameter').select_related('contact').annotate(
             total_sum=Sum(F('ordered_items__quantity') * F('ordered_items__product_info__price'))).distinct()
-
-        serializer = OrderSerializer(order, many=True)
+        print(orders)
+        serializer = OrderSerializer(orders, many=True)
         return Response(serializer.data)
 
 
@@ -137,9 +137,8 @@ class RegisterAccount(APIView):
     Для регистрации покупателей
     """
 
-    # Регистрация методом POST
     def post(self, request, *args, **kwargs):
-
+        """Регистрация методом POST"""
         # проверяем обязательные аргументы
         if {'first_name', 'last_name', 'email', 'password', }.issubset(request.data):
             errors = {}
@@ -222,8 +221,8 @@ class BasketView(APIView):
     Класс для работы с корзиной пользователя
     """
 
-    # получить корзину
     def get(self, request, *args, **kwargs):
+        """получить корзину"""
         if not request.user.is_authenticated:
             return JsonResponse({'Status': False, 'Error': 'Требуется авторизация!'}, status=403)
         basket = Order.objects.filter(
@@ -235,8 +234,8 @@ class BasketView(APIView):
         serializer = OrderSerializer(basket, many=True)
         return Response(serializer.data)
 
-    # редактировать корзину
     def put(self, request, *args, **kwargs):
+        """редактировать корзину"""
         if not request.user.is_authenticated:
             return JsonResponse({'Status': False, 'Error': 'Необходима авторизация'}, status=403)
 
@@ -261,8 +260,8 @@ class BasketView(APIView):
                 return JsonResponse({'Status': True, 'Отредактированно объектов': objects_updated})
         return JsonResponse({'Status': False, 'Errors': 'Не указаны все необходимые аргументы'})
 
-    # удалить товары из корзины
     def delete(self, request, *args, **kwargs):
+        """удалить товары из корзины"""
         if not request.user.is_authenticated:
             return JsonResponse({'Status': False, 'Error': 'Необходима авторизация'}, status=403)
 
@@ -283,8 +282,8 @@ class BasketView(APIView):
                 return JsonResponse({'Status': True, 'Удалено объектов': deleted_count})
         return JsonResponse({'Status': False, 'Errors': 'Не указаны все необходимые аргументы'})
 
-    # добавить позиции в корзину
     def post(self, request, *args, **kwargs):
+        """добавить товары в корзину"""
         if not request.user.is_authenticated:
             return JsonResponse({'Status': False, 'Error': 'Требуется авторизация!'}, status=403)
 
@@ -319,8 +318,8 @@ class OrderView(APIView):
     Класс для получения и размешения заказов пользователями
     """
 
-    # получить мои заказы
     def get(self, request, *args, **kwargs):
+        """получить мои заказы"""
         if not request.user.is_authenticated:
             return JsonResponse({'Status': False, 'Error': 'Требуется авторизация'}, status=403)
         order = Order.objects.filter(
@@ -332,8 +331,8 @@ class OrderView(APIView):
         serializer = OrderSerializer(order, many=True)
         return Response(serializer.data)
 
-    # разместить заказ из корзины
     def post(self, request, *args, **kwargs):
+        """разместить заказ из корзины"""
         if not request.user.is_authenticated:
             return JsonResponse({'Status': False, 'Error': 'Требуется авторизация'}, status=403)
 

@@ -27,11 +27,14 @@ USER_TYPE_CHOICES = (
 
 
 class MyUserManager(BaseUserManager):
+    """
+    Менеджер пользователей
+    """
     use_in_migrations = True
 
     def _create_user(self, email, password, **extra_fields):
         """
-        Create and save a user with the given username, email, and password.
+        Создаём и сохраняем пользователя
         """
         if not email:
             raise ValueError('The given email must be set')
@@ -60,7 +63,7 @@ class MyUserManager(BaseUserManager):
 
 class MyUser(AbstractUser):
     """
-    Стандартная модель пользователей
+    Кастомная модель пользователя
     """
     REQUIRED_FIELDS = []
     objects = MyUserManager()
@@ -98,6 +101,9 @@ class MyUser(AbstractUser):
 
 
 class Shop(models.Model):
+    """
+    Модель магазина
+    """
     name = models.CharField(max_length=50, verbose_name='Название магазина')
     url = models.URLField(verbose_name='Ссылка', null=True, blank=True)
     user = models.OneToOneField(MyUser, verbose_name='Пользователь',
@@ -116,6 +122,9 @@ class Shop(models.Model):
 
 
 class Category(models.Model):
+    """
+    Модель категории товара
+    """
     name = models.CharField(max_length=40, verbose_name='Название категории')
     shops = models.ManyToManyField(Shop, verbose_name='Магазины', related_name='categories', blank=True)
 
@@ -129,6 +138,9 @@ class Category(models.Model):
 
 
 class Product(models.Model):
+    """
+    Модель товара
+    """
     name = models.CharField(max_length=80, verbose_name='Название продукта')
     category = models.ForeignKey(Category, verbose_name='Категория', related_name='products', blank=True,
                                  on_delete=models.CASCADE)
@@ -143,6 +155,9 @@ class Product(models.Model):
 
 
 class ProductInfo(models.Model):
+    """
+    Модель описания товара (стандартная информация)
+    """
     model = models.CharField(max_length=80, verbose_name='Модель', blank=True)
     external_id = models.PositiveIntegerField(verbose_name='Внешний ИД')
     product = models.ForeignKey(Product, verbose_name='Продукт', related_name='product_infos', blank=True,
@@ -159,6 +174,9 @@ class ProductInfo(models.Model):
 
 
 class Parameter(models.Model):
+    """
+    Модель параметра товара (дополнительные параметры)
+    """
     name = models.CharField(max_length=40, verbose_name='Название')
 
     class Meta:
@@ -171,6 +189,9 @@ class Parameter(models.Model):
 
 
 class ProductParameter(models.Model):
+    """
+    Модель суммарной информации о товаре (стандартная информация+дополнительные характеристики)
+    """
     product_info = models.ForeignKey(ProductInfo, verbose_name='Информация о продукте',
                                      related_name='product_parameters', blank=True,
                                      on_delete=models.CASCADE)
@@ -187,6 +208,9 @@ class ProductParameter(models.Model):
 
 
 class Contact(models.Model):
+    """
+    Контактная информация пользователя
+    """
     user = models.ForeignKey(MyUser, verbose_name='Пользователь',
                              related_name='contacts', blank=True,
                              on_delete=models.CASCADE)
@@ -203,6 +227,7 @@ class Contact(models.Model):
 
 
 class Order(models.Model):
+    """Модель заказа (шапка)"""
     user = models.ForeignKey(MyUser, verbose_name='Пользователь',
                              related_name='orders', blank=True,
                              on_delete=models.CASCADE)
@@ -211,6 +236,7 @@ class Order(models.Model):
     contact = models.ForeignKey(Contact, verbose_name='Контакт',
                                 blank=True, null=True,
                                 on_delete=models.CASCADE)
+    total_sum = 0
 
     class Meta:
         verbose_name = 'Заказ'
@@ -222,6 +248,7 @@ class Order(models.Model):
 
 
 class OrderItem(models.Model):
+    """Содержимое заказа (позиции)"""
     order = models.ForeignKey(Order, verbose_name='Заказ', related_name='ordered_items',
                               blank=True,
                               on_delete=models.CASCADE)
@@ -240,6 +267,7 @@ class OrderItem(models.Model):
 
 
 class ConfirmEmailToken(models.Model):
+    """Подтверждение ключа"""
     class Meta:
         verbose_name = 'Токен подтверждения Email'
         verbose_name_plural = 'Токены подтверждения Email'

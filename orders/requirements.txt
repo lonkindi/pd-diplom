@@ -1,5 +1,6 @@
 amqp==5.0.5
 asgiref==3.2.10
+attrs==20.3.0
 billiard==3.6.3.0
 celery==5.0.5
 certifi==2020.6.20
@@ -11,15 +12,20 @@ click-repl==0.1.6
 Django==3.1.7
 django-rest-passwordreset==1.1.0
 djangorestframework==3.12.2
+drf-spectacular==0.14.0
 idna==2.10
+inflection==0.5.1
+jsonschema==3.2.0
 kombu==5.0.2
 prompt-toolkit==3.0.16
+pyrsistent==0.17.3
 pytz==2020.1
 PyYAML==5.3.1
 redis==3.5.3
 requests==2.24.0
 six==1.15.0
 sqlparse==0.3.1
+uritemplate==3.0.1
 urllib3==1.25.10
 vine==5.0.0
 wcwidth==0.2.5
