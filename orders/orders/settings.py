@@ -14,6 +14,10 @@ import os
 import rest_framework.authentication
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
+from rest_framework.throttling import AnonRateThrottle
+
+from shop.views import MyAnonRateThrottle
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
@@ -104,6 +108,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+
 AUTH_USER_MODEL = 'shop.MyUser'
 EMAIL_HOST_USER = ''
 
@@ -113,7 +118,15 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.BasicAuthentication',
         'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.TokenAuthentication',
-    ]
+    ],
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle',
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '100/day',
+        'user': '100/hour'
+    }
 }
 
 # Internationalization

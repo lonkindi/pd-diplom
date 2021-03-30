@@ -7,13 +7,14 @@ from django.contrib.auth.password_validation import validate_password
 from django.db import IntegrityError
 from django.db.models import Q, F, Sum
 from django.http import JsonResponse
-from drf_spectacular.utils import extend_schema, extend_schema_serializer
 from rest_framework import viewsets
 from rest_framework.authtoken.models import Token
 from rest_framework.generics import ListAPIView
 from rest_framework.response import Response
+from rest_framework.throttling import AnonRateThrottle
 from rest_framework.views import APIView
 from yaml import load as load_yaml, Loader
+from django.core.cache import caches
 
 from shop.models import Category, Product, ProductInfo, Parameter, ProductParameter, Shop, Order, OrderItem
 from shop.serializers import CategorySerializer, ShopSerializer, MyUserSerializer, ProductInfoSerializer, \
@@ -21,6 +22,8 @@ from shop.serializers import CategorySerializer, ShopSerializer, MyUserSerialize
 # from shop.signals import new_order
 from shop.tasks import new_order_email_task
 
+class MyAnonRateThrottle(AnonRateThrottle):
+    cache = caches['throttle_cache']
 
 class LoginAccount(APIView):
     """
@@ -66,7 +69,7 @@ class PartnerUpdate(APIView):
     """
     Класс для обновления прайса поставщика
     """
-
+    throttle_classes = [MyAnonRateThrottle]
     def post(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
             return JsonResponse({'Status': False, 'Error': 'Log in required'}, status=403)
@@ -110,6 +113,7 @@ class PartnerUpdate(APIView):
 
 
 class PartnerOrders(viewsets.ModelViewSet):
+
     """
     Класс для получения заказов поставщиками
     """

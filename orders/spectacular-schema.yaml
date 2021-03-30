@@ -106,7 +106,7 @@ paths:
   /api/v1/partner/orders/:
     get:
       operationId: api_v1_partner_orders_list
-      description: Класс для получения заказов поставщиками
+      description: ''
       tags:
       - api
       security:
@@ -125,7 +125,7 @@ paths:
           description: ''
     post:
       operationId: api_v1_partner_orders_create
-      description: Класс для получения заказов поставщиками
+      description: ''
       tags:
       - api
       requestBody:
@@ -155,7 +155,7 @@ paths:
   /api/v1/partner/orders/{id}/:
     get:
       operationId: api_v1_partner_orders_retrieve
-      description: Класс для получения заказов поставщиками
+      description: ''
       parameters:
       - in: path
         name: id
@@ -179,7 +179,7 @@ paths:
           description: ''
     put:
       operationId: api_v1_partner_orders_update
-      description: Класс для получения заказов поставщиками
+      description: ''
       parameters:
       - in: path
         name: id
@@ -215,7 +215,7 @@ paths:
           description: ''
     patch:
       operationId: api_v1_partner_orders_partial_update
-      description: Класс для получения заказов поставщиками
+      description: ''
       parameters:
       - in: path
         name: id
@@ -250,7 +250,7 @@ paths:
           description: ''
     delete:
       operationId: api_v1_partner_orders_destroy
-      description: Класс для получения заказов поставщиками
+      description: ''
       parameters:
       - in: path
         name: id
@@ -271,7 +271,7 @@ paths:
   /api/v1/partner/update:
     post:
       operationId: api_v1_partner_update_create
-      description: Класс для обновления прайса от поставщика
+      description: Класс для обновления прайса поставщика
       tags:
       - api
       security:
