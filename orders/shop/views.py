@@ -22,8 +22,8 @@ from shop.serializers import CategorySerializer, ShopSerializer, MyUserSerialize
 # from shop.signals import new_order
 from shop.tasks import new_order_email_task
 
-class MyAnonRateThrottle(AnonRateThrottle):
-    cache = caches['throttle_cache']
+# class MyAnonRateThrottle(AnonRateThrottle):
+    # cache = caches['throttle_cache']
 
 class LoginAccount(APIView):
     """
@@ -69,7 +69,7 @@ class PartnerUpdate(APIView):
     """
     Класс для обновления прайса поставщика
     """
-    throttle_classes = [MyAnonRateThrottle]
+    # throttle_classes = [MyAnonRateThrottle]
     def post(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
             return JsonResponse({'Status': False, 'Error': 'Log in required'}, status=403)

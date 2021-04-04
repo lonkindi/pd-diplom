@@ -14,9 +14,9 @@ import os
 import rest_framework.authentication
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-from rest_framework.throttling import AnonRateThrottle
+# from rest_framework.throttling import AnonRateThrottle
 
-from shop.views import MyAnonRateThrottle
+# from shop.views import MyAnonRateThrottle
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
